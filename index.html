@@ -12,18 +12,18 @@
     <div class="app-container">
         <div class="header-section">
             <div class="box month-box">
-                <span class="btn-text"><</span>
-                <span>MARCH</span>
-                <span class="btn-text">></span>
+                <span class="btn-text" id="prevMonth">&lt;</span>
+                <span id="monthDisplay">MARCH</span>
+                <span class="btn-text" id="nextMonth">&gt;</span>
             </div>
             <div class="box year-box">
-                <span class="btn-text"><</span>
-                <span>2026</span>
-                <span class="btn-text">></span>
+                <span class="btn-text" id="prevYear">&lt;</span>
+                <span id="yearDisplay">2026</span>
+                <span class="btn-text" id="nextYear">&gt;</span>
             </div>
         </div>
 
-        <div class="calendar-grid">
+        <div class="calendar-grid" id="calendarGrid">
             <div class="day-name sun">SUN</div>
             <div class="day-name">MON</div>
             <div class="day-name">TUE</div>
