@@ -40,34 +40,43 @@ body {
     padding: 0 5px;
 }
 
+/* Calendar Grid ကို အကွက်ဖော်ခြင်း */
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 5px;
     margin-bottom: 20px;
+    border-top: 1px solid #eee;
+    border-left: 1px solid #eee;
 }
 
 .day-name {
     text-align: center;
     font-size: 11px;
     font-weight: bold;
-    padding-bottom: 5px;
+    padding: 10px 0;
+    border-right: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    background-color: #fcfcfc;
+}
+
+.day {
+    text-align: center;
+    padding: 10px 0;
+    border-right: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    font-size: 13px;
+    min-height: 20px;
 }
 
 .sun, .sat { color: red; }
 
-.date-cell {
-    text-align: center;
-    padding: 10px 0;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-    font-size: 13px;
-}
-
-.today {
-    background-color: #E026FA;
-    color: white;
+/* ဒီနေ့ရက်ကို Highlight လုပ်မည့်ပုံစံ (ခရမ်းရောင်ဝိုင်းဝိုင်းလေး) */
+.today-highlight {
+    background-color: #E026FA !important;
+    color: white !important;
     font-weight: bold;
+    border-radius: 50%; /* ဝိုင်းဝိုင်းလေး ဖြစ်စေရန် */
+    transform: scale(0.8); /* အကွက်ထဲမှာ အနေတော်ဖြစ်အောင် */
 }
 
 .task-label-title {
@@ -78,18 +87,22 @@ body {
     font-weight: bold;
     border-radius: 5px;
     margin-bottom: 10px;
+    margin-top: 10px;
 }
 
 .task-item {
     display: flex;
     align-items: center;
     gap: 8px;
+    margin-bottom: 8px;
 }
 
 .task-num {
     border: 1px solid #ddd;
     padding: 4px 8px;
     border-radius: 5px;
+    min-width: 25px;
+    text-align: center;
 }
 
 input {
@@ -104,7 +117,17 @@ input {
     color: #4CAF50;
     font-weight: bold;
     font-size: 12px;
-}/* Memory Day အတွက် ခရမ်းရောင် အလှဆင်ခြင်း */
+    cursor: pointer;
+    transition: 0.3s;
+    padding: 5px;
+}
+
+.check-mark:hover {
+    opacity: 0.7;
+    transform: scale(1.2);
+}
+
+/* Memory Day အတွက် ခရမ်းရောင် အလှဆင်ခြင်း */
 .memory-label {
     background-color: #E026FA !important;
     color: white !important;
@@ -113,35 +136,5 @@ input {
 .memory-list .task-num {
     background-color: #E026FA !important;
     color: white !important;
-}
-
-/* OK ခလုတ်ကို Mouse တင်ရင် လက်ညှိုးပုံပေါ်စေရန် */
-.check-mark {
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.check-mark:hover {
-    opacity: 0.7;
-    transform: scale(1.1);
-}/* Memory Day အတွက် ခရမ်းရောင် အလှဆင်ခြင်း */
-.memory-label {
-    background-color: #E026FA !important;
-    color: white !important;
-}
-
-.memory-list .task-num {
-    background-color: #E026FA !important;
-    color: white !important;
-}
-
-/* OK ခလုတ်ကို Mouse တင်ရင် လက်ညှိုးပုံပေါ်စေရန် */
-.check-mark {
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.check-mark:hover {
-    opacity: 0.7;
-    transform: scale(1.1);
+    border: none;
 }
