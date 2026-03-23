@@ -31,28 +31,30 @@
             <div class="day-name">THUR</div>
             <div class="day-name">FRI</div>
             <div class="day-name sat">SAT</div>
-            </div>
+        </div>
 
         <div class="task-label-title">TODAY TASKS</div>
         <div class="task-list">
-            <div class="task-item"><span class="task-num">1</span><input type="text" placeholder="Write Here..."><span class="check-mark">OK</span></div>
-            <div class="task-item"><span class="task-num">2</span><input type="text" placeholder="Write Here..."><span class="check-mark">OK</span></div>
-            <div class="task-item"><span class="task-num">3</span><input type="text" placeholder="Write Here..."><span class="check-mark">OK</span></div>
+            <div class="task-item"><span class="task-num">1</span><input type="text" id="today1" placeholder="Write Here..."><span class="check-mark" onclick="saveTask('today1')">OK</span></div>
+            <div class="task-item"><span class="task-num">2</span><input type="text" id="today2" placeholder="Write Here..."><span class="check-mark" onclick="saveTask('today2')">OK</span></div>
+            <div class="task-item"><span class="task-num">3</span><input type="text" id="today3" placeholder="Write Here..."><span class="check-mark" onclick="saveTask('today3')">OK</span></div>
         </div>
 
         <div class="task-label-title">TOMORROW TASKS</div>
         <div class="task-list">
-            <div class="task-item"><span class="task-num">1</span><input type="text" placeholder="Write Here..."><span class="check-mark">OK</span></div>
-            <div class="task-item"><span class="task-num">2</span><input type="text" placeholder="Write Here..."><span class="check-mark">OK</span></div>
-            <div class="task-item"><span class="task-num">3</span><input type="text" placeholder="Write Here..."><span class="check-mark">OK</span></div>
+            <div class="task-item"><span class="task-num">1</span><input type="text" id="tomorrow1" placeholder="Write Here..."><span class="check-mark" onclick="saveTask('tomorrow1')">OK</span></div>
+            <div class="task-item"><span class="task-num">2</span><input type="text" id="tomorrow2" placeholder="Write Here..."><span class="check-mark" onclick="saveTask('tomorrow2')">OK</span></div>
+            <div class="task-item"><span class="task-num">3</span><input type="text" id="tomorrow3" placeholder="Write Here..."><span class="check-mark" onclick="saveTask('tomorrow3')">OK</span></div>
         </div>
 
         <div class="task-label-title memory-label">YOUR MEMORY DAY</div>
         <div class="task-list memory-list">
-            <div class="task-item"><span class="task-num">M1</span><input type="text" placeholder="Record a memory..."><span class="check-mark">OK</span></div>
-            <div class="task-item"><span class="task-num">M2</span><input type="text" placeholder="Record a memory..."><span class="check-mark">OK</span></div>
-            <div class="task-item"><span class="task-num">M3</span><input type="text" placeholder="Record a memory..."><span class="check-mark">OK</span></div>
+            <div class="task-item"><span class="task-num">M1</span><input type="text" id="memory1" placeholder="Record a memory..."><span class="check-mark" onclick="saveTask('memory1')">OK</span></div>
+            <div class="task-item"><span class="task-num">M2</span><input type="text" id="memory2" placeholder="Record a memory..."><span class="check-mark" onclick="saveTask('memory2')">OK</span></div>
+            <div class="task-item"><span class="task-num">M3</span><input type="text" id="memory3" placeholder="Record a memory..."><span class="check-mark" onclick="saveTask('memory3')">OK</span></div>
         </div>
-    </div> <script src="script.js"></script>
+    </div> 
+
+    <script src="script.js"></script>
 </body>
 </html>
