@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Calendar App</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="header-section">
+            <div class="box month-box">
+                <span class="btn-text"><</span>
+                <span>MARCH</span>
+                <span class="btn-text">></span>
+            </div>
+            <div class="box year-box">
+                <span class="btn-text"><</span>
+                <span>2026</span>
+                <span class="btn-text">></span>
+            </div>
+        </div>
+
+        <div class="calendar-grid">
+            <div class="day-name sun">SUN</div>
+            <div class="day-name">MON</div>
+            <div class="day-name">TUE</div>
+            <div class="day-name">WED</div>
+            <div class="day-name">THUR</div>
+            <div class="day-name">FRI</div>
+            <div class="day-name sat">SAT</div>
+            </div>
+
+        <div class="task-label-title">TODAY TASKS</div>
+        <div class="task-list">
+            <div class="task-item"><span class="task-num">1</span><input type="text" placeholder="Write Here..."><span class="check-mark">OK</span></div>
+            <div class="task-item"><span class="task-num">2</span><input type="text" placeholder="Write Here..."><span class="check-mark">OK</span></div>
+            <div class="task-item"><span class="task-num">3</span><input type="text" placeholder="Write Here..."><span class="check-mark">OK</span></div>
+        </div>
+
+        <div class="task-label-title">TOMORROW TASKS</div>
+        <div class="task-list">
+            <div class="task-item"><span class="task-num">1</span><input type="text" placeholder="Write Here..."><span class="check-mark">OK</span></div>
+            <div class="task-item"><span class="task-num">2</span><input type="text" placeholder="Write Here..."><span class="check-mark">OK</span></div>
+            <div class="task-item"><span class="task-num">3</span><input type="text" placeholder="Write Here..."><span class="check-mark">OK</span></div>
+        </div>
+
+        <div class="task-label-title memory-label">YOUR MEMORY DAY</div>
+        <div class="task-list memory-list">
+            <div class="task-item"><span class="task-num">M1</span><input type="text" placeholder="Record a memory..."><span class="check-mark">OK</span></div>
+            <div class="task-item"><span class="task-num">M2</span><input type="text" placeholder="Record a memory..."><span class="check-mark">OK</span></div>
+            <div class="task-item"><span class="task-num">M3</span><input type="text" placeholder="Record a memory..."><span class="check-mark">OK</span></div>
+        </div>
+    </div> <script src="script.js"></script>
+</body>
+</html>
