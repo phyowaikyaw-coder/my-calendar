@@ -1,11 +1,10 @@
-// ၁။ အခြေခံ Variables
 let currentMonth = new Date().getMonth(); 
 let currentYear = new Date().getFullYear();
 let viewedDate = new Date(); 
 
 const months = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
 
-// ၂။ Local Date Key ထုတ်ယူခြင်း (YYYY-MM-DD)
+// ၁။ ရက်စွဲ Key ထုတ်ယူခြင်း (YYYY-MM-DD)
 function getDateKey(date) {
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -13,7 +12,7 @@ function getDateKey(date) {
     return `${y}-${m}-${d}`;
 }
 
-// ၃။ Calendar ဆွဲခြင်း
+// ၂။ Calendar ဆွဲခြင်း
 function renderCalendar() {
     const monthDisplay = document.getElementById('monthDisplay');
     const yearDisplay = document.getElementById('yearDisplay');
@@ -66,36 +65,35 @@ function renderCalendar() {
     }
 }
 
-// ၄။ Task သိမ်းဆည်းရန်
+// ၃။ Task သိမ်းဆည်းရန် (အဓိကပြင်ဆင်ချက်)
 function saveTask(id) {
     let targetDate = new Date(viewedDate);
-    // Tomorrow Task ဆိုရင် ကြည့်နေတဲ့ရက်ရဲ့ နောက်တစ်ရက်မှာ သွားသိမ်းမယ်
+    let storageId = id;
+
+    // အကယ်၍ Tomorrow မှာ ရိုက်ပြီး သိမ်းရင် နောက်ရက်ရဲ့ Today အနေနဲ့ သွားသိမ်းမယ်
     if (id.startsWith('tomorrow')) {
         targetDate.setDate(viewedDate.getDate() + 1);
+        storageId = id.replace('tomorrow', 'today'); // 'tomorrow1' ကို 'today1' အဖြစ်ပြောင်းသိမ်းမယ်
     }
 
     const dateKey = getDateKey(targetDate);
-    // Tomorrow input က data ကို သိမ်းရင်လည်း 'today' ဆိုတဲ့ ID နဲ့ပဲ သိမ်းရမှာပါ (ဒါမှ နောက်ရက်မှာ Today ဖြစ်မှာပါ)
-    const storageId = id.startsWith('tomorrow') ? id.replace('tomorrow', 'today') : id;
-    
     const value = document.getElementById(id).value;
+    
     localStorage.setItem(`${dateKey}_${storageId}`, value);
-    alert("Saved for " + dateKey);
+    alert("Saved success for " + dateKey);
 }
 
-// ၅။ အချက်အလက်များကို ပြန်ဖော်ရန် (အဓိက အပိုင်း)
+// ၄။ အချက်အလက်များကို ပြန်ဖော်ရန်
 function loadTasksByDate(date) {
     const dateKey = getDateKey(date);
     const todayLabel = document.getElementById('todayLabel');
     const tomorrowLabel = document.getElementById('tomorrowLabel');
     const realTodayKey = getDateKey(new Date());
 
-    // Label ပြောင်းလဲခြင်း
     if (todayLabel) {
         todayLabel.innerText = (dateKey === realTodayKey) ? "TODAY TASKS" : `${date.getDate()} ${months[date.getMonth()]} TASKS`;
     }
 
-    // Tomorrow အတွက် ရက်စွဲတွက်ခြင်း
     const tomDate = new Date(date);
     tomDate.setDate(date.getDate() + 1);
     const tomKey = getDateKey(tomDate);
@@ -107,8 +105,9 @@ function loadTasksByDate(date) {
     }
 
     // Tomorrow Fields (၁၊ ၂၊ ၃)
+    // ဒီနေရာမှာ Tomorrow Box ထဲကို နောက်ရက်ရဲ့ Today data ကို ဆွဲပြရမှာပါ
     for (let i = 1; i <= 3; i++) {
-        const val = localStorage.getItem(`${tomKey}_today${i}`); // Tomorrow ဆိုတာ နောက်ရက်ရဲ့ Today ပါပဲ
+        const val = localStorage.getItem(`${tomKey}_today${i}`); 
         document.getElementById(`tomorrow${i}`).value = val ? val : "";
     }
 
@@ -119,7 +118,6 @@ function loadTasksByDate(date) {
     }
 }
 
-// ခလုတ်များ
 document.getElementById('prevMonth').onclick = () => { currentMonth--; checkDate(); };
 document.getElementById('nextMonth').onclick = () => { currentMonth++; checkDate(); };
 document.getElementById('prevYear').onclick = () => { currentYear--; checkDate(); };
@@ -133,5 +131,5 @@ function checkDate() {
 
 window.onload = () => {
     renderCalendar();
-    loadTasksByDate(new Date()); // Page စဖွင့်ရင် ဒီနေ့အတွက် Load လုပ်မယ်
+    loadTasksByDate(new Date()); 
 };
