@@ -1,15 +1,15 @@
-// လက်ရှိ ပြသနေသော လ နှင့် နှစ်
 let currentMonth = new Date().getMonth(); 
 let currentYear = new Date().getFullYear();
+let viewedDate = new Date(); // လက်ရှိ ကြည့်ရှုနေသော ရက်စွဲ
 
 const months = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
 
-// ရက်စွဲအလိုက် Key ထုတ်ရန် (ဥပမာ: 2026-03-26)
 function getDateKey(date) {
-    return date.toISOString().split('T')[0];
+    const d = new Date(date);
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().split('T')[0];
 }
 
-// Calendar ဆွဲရန် Function
 function renderCalendar() {
     const monthDisplay = document.getElementById('monthDisplay');
     const yearDisplay = document.getElementById('yearDisplay');
@@ -19,12 +19,9 @@ function renderCalendar() {
     yearDisplay.innerText = currentYear;
 
     const dayNames = `
-        <div class="day-name sun">SUN</div>
-        <div class="day-name">MON</div>
-        <div class="day-name">TUE</div>
-        <div class="day-name">WED</div>
-        <div class="day-name">THUR</div>
-        <div class="day-name">FRI</div>
+        <div class="day-name sun">SUN</div><div class="day-name">MON</div>
+        <div class="day-name">TUE</div><div class="day-name">WED</div>
+        <div class="day-name">THUR</div><div class="day-name">FRI</div>
         <div class="day-name sat">SAT</div>
     `;
     calendarGrid.innerHTML = dayNames;
@@ -43,70 +40,65 @@ function renderCalendar() {
         const dayDiv = document.createElement('div');
         dayDiv.classList.add('day');
         dayDiv.innerText = day;
-        dayDiv.style.cursor = "pointer";
 
         if (day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
             dayDiv.classList.add('today-highlight');
         }
 
-        // ရက်စွဲကို နှိပ်လိုက်ရင် အဲ့ဒီနေ့က Task တွေကို ပြန်ပြရန်
         dayDiv.onclick = () => {
-            const clickedDate = new Date(currentYear, currentMonth, day);
-            loadTasksByDate(clickedDate);
-            // Alert လေးနဲ့ ဘယ်နေ့ကို ကြည့်နေလဲဆိုတာ ပြပေးမယ်
-            console.log("Viewing history for: " + getDateKey(clickedDate));
+            viewedDate = new Date(currentYear, currentMonth, day);
+            
+            // UI Highlight ပြောင်းရန်
+            document.querySelectorAll('.day').forEach(d => d.style.background = "transparent");
+            dayDiv.style.background = "rgba(241, 196, 15, 0.3)";
+            dayDiv.style.borderRadius = "50%";
+            
+            loadTasksByDate(viewedDate);
         };
 
         calendarGrid.appendChild(dayDiv);
     }
 }
 
-// Task သိမ်းရန် (ရက်စွဲနဲ့တွဲပြီး သိမ်းသွားမည်)
 function saveTask(id) {
-    const value = document.getElementById(id).value;
-    const now = new Date();
-    let targetDate = new Date();
-
-    // Tomorrow IDs ဖြစ်ရင် မနက်ဖြန်ရက်စွဲနဲ့ သိမ်းမယ်
+    let targetDate = new Date(viewedDate);
     if (id.startsWith('tomorrow')) {
-        targetDate.setDate(now.getDate() + 1);
+        targetDate.setDate(viewedDate.getDate() + 1);
     }
 
     const dateKey = getDateKey(targetDate);
+    const value = document.getElementById(id).value;
     localStorage.setItem(`${dateKey}_${id}`, value);
-    alert("မှတ်သားပြီးပါပြီဗျာ!");
+    alert("Saved for " + dateKey);
 }
 
-// Task များအားလုံးကို စနစ်တကျ ပြန်ဖော်ရန် (Rolling System ပါဝင်သည်)
 function loadTasks() {
     const now = new Date();
     const todayKey = getDateKey(now);
     
-    // ၁။ မနေ့က Tomorrow Task ကို ဒီနေ့ Today ထဲ ရွှေ့ပေးခြင်း
-    const ids = ['1', '2', '3']; // index များ
-    ids.forEach(num => {
-        const yesterdayTomorrowData = localStorage.getItem(`${todayKey}_tomorrow${num}`);
-        
-        if (yesterdayTomorrowData) {
-            // မနေ့က Tomorrow ကို ဒီနေ့ Today ထဲ ထည့်မယ်
-            localStorage.setItem(`${todayKey}_today${num}`, yesterdayTomorrowData);
-            // ရွှေ့ပြီးရင် မနေ့က Tomorrow Key ကို ဖျက်ပစ်မယ်
+    // Rolling System: မနေ့က Tomorrow ကို ဒီနေ့ Today သို့
+    const nums = ['1', '2', '3'];
+    nums.forEach(num => {
+        const prevData = localStorage.getItem(`${todayKey}_tomorrow${num}`);
+        if (prevData) {
+            localStorage.setItem(`${todayKey}_today${num}`, prevData);
             localStorage.removeItem(`${todayKey}_tomorrow${num}`);
         }
     });
 
-    // ၂။ လက်ရှိ ဒီနေ့ နဲ့ မနက်ဖြန် Task တွေကို UI မှာ ပြမယ်
+    viewedDate = now;
     loadTasksByDate(now);
 }
 
-// သတ်မှတ်ထားသော ရက်စွဲအလိုက် Task များကို Input Box များတွင် ပြပေးရန်
 function loadTasksByDate(date) {
     const dateKey = getDateKey(date);
-    
-    // မနက်ဖြန် ရက်စွဲကို တွက်မယ်
     const tomorrow = new Date(date);
     tomorrow.setDate(date.getDate() + 1);
     const tomorrowKey = getDateKey(tomorrow);
+
+    // ခေါင်းစဉ်ပြောင်းလဲခြင်း
+    document.getElementById('todayLabel').innerText = (dateKey === getDateKey(new Date())) ? "TODAY TASKS" : `${date.getDate()} ${months[date.getMonth()]} TASKS`;
+    document.getElementById('tomorrowLabel').innerText = (dateKey === getDateKey(new Date())) ? "TOMORROW TASKS" : "NEXT DAY TASKS";
 
     const taskTypes = ['today', 'tomorrow', 'memory'];
     const nums = ['1', '2', '3'];
@@ -115,14 +107,12 @@ function loadTasksByDate(date) {
         nums.forEach(num => {
             const id = `${type}${num}`;
             const currentKey = (type === 'tomorrow') ? tomorrowKey : dateKey;
-            
             const saved = localStorage.getItem(`${currentKey}_${id}`);
             document.getElementById(id).value = saved ? saved : "";
         });
     });
 }
 
-// ခလုတ်များ
 document.getElementById('prevMonth').onclick = () => { currentMonth--; checkDate(); };
 document.getElementById('nextMonth').onclick = () => { currentMonth++; checkDate(); };
 document.getElementById('prevYear').onclick = () => { currentYear--; checkDate(); };
@@ -134,8 +124,7 @@ function checkDate() {
     renderCalendar();
 }
 
-// App စတင်ခြင်း
 window.onload = () => {
     renderCalendar();
-    loadTasks(); // ဂိမ်းစတာနဲ့ Task တွေ ရွှေ့/ပြ လုပ်မယ်
+    loadTasks();
 };
