@@ -1,17 +1,17 @@
 let currentMonth = new Date().getMonth(); 
 let currentYear = new Date().getFullYear();
-let viewedDate = new Date(); // လက်ရှိ ကြည့်ရှုနေသော ရက်စွဲ
+let viewedDate = new Date(); 
 
 const months = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
 
-// ရက်စွဲကို ISO String (YYYY-MM-DD) ပြောင်းရန် (Timezone Error မတက်အောင်)
+// အချိန်ဒေသ Error ကင်းအောင် ရက်စွဲထုတ်မည့် Function (YYYY-MM-DD)
 function getDateKey(date) {
-    const d = new Date(date);
-    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-    return d.toISOString().split('T')[0];
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
-// Calendar ဆွဲရန်
 function renderCalendar() {
     const monthDisplay = document.getElementById('monthDisplay');
     const yearDisplay = document.getElementById('yearDisplay');
@@ -50,26 +50,17 @@ function renderCalendar() {
 
         dayDiv.onclick = () => {
             viewedDate = new Date(currentYear, currentMonth, day);
-            
-            // UI Selection Highlight
-            document.querySelectorAll('.day').forEach(d => {
-                d.style.background = "transparent";
-                d.style.border = "none";
-            });
+            document.querySelectorAll('.day').forEach(d => d.style.background = "transparent");
             dayDiv.style.background = "rgba(241, 196, 15, 0.3)";
             dayDiv.style.borderRadius = "50%";
-            
             loadTasksByDate(viewedDate);
         };
-
         calendarGrid.appendChild(dayDiv);
     }
 }
 
-// Task သိမ်းဆည်းရန်
 function saveTask(id) {
     let targetDate = new Date(viewedDate);
-    // Tomorrow Task ဆိုရင် ကြည့်နေတဲ့ရက်ရဲ့ နောက်တစ်ရက်မှာ သွားသိမ်းမယ်
     if (id.startsWith('tomorrow')) {
         targetDate.setDate(viewedDate.getDate() + 1);
     }
@@ -80,10 +71,71 @@ function saveTask(id) {
     alert("Saved: " + dateKey);
 }
 
-// မနေ့က Tomorrow ကို ဒီနေ့ Today သို့ ရွှေ့ပေးမည့် Rolling Logic
 function loadTasks() {
     const now = new Date();
     const todayKey = getDateKey(now);
     
-    // မနေ့က ရက်စွဲကို တွက်မယ်
-    const yesterday
+    // မနေ့ကရက်စွဲကို ရှာမယ်
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    const yesterdayKey = getDateKey(yesterday);
+
+    const nums = ['1', '2', '3'];
+    nums.forEach(num => {
+        const pendingTask = localStorage.getItem(`${yesterdayKey}_tomorrow${num}`);
+        if (pendingTask) {
+            localStorage.setItem(`${todayKey}_today${num}`, pendingTask);
+            localStorage.removeItem(`${yesterdayKey}_tomorrow${num}`);
+        }
+    });
+
+    viewedDate = now;
+    loadTasksByDate(now);
+}
+
+function loadTasksByDate(date) {
+    const dateKey = getDateKey(date);
+    const tomorrow = new Date(date);
+    tomorrow.setDate(date.getDate() + 1);
+    const tomorrowKey = getDateKey(tomorrow);
+
+    const todayLabel = document.getElementById('todayLabel');
+    const tomorrowLabel = document.getElementById('tomorrowLabel');
+    const realTodayKey = getDateKey(new Date());
+
+    if (dateKey === realTodayKey) {
+        todayLabel.innerText = "TODAY TASKS";
+        tomorrowLabel.innerText = "TOMORROW TASKS";
+    } else {
+        todayLabel.innerText = `${date.getDate()} ${months[date.getMonth()]} TASKS`;
+        tomorrowLabel.innerText = `NEXT DAY TASKS`;
+    }
+
+    const taskTypes = ['today', 'tomorrow', 'memory'];
+    const nums = ['1', '2', '3'];
+
+    taskTypes.forEach(type => {
+        nums.forEach(num => {
+            const id = `${type}${num}`;
+            const currentKey = (type === 'tomorrow') ? tomorrowKey : dateKey;
+            const saved = localStorage.getItem(`${currentKey}_${id}`);
+            document.getElementById(id).value = saved ? saved : "";
+        });
+    });
+}
+
+document.getElementById('prevMonth').onclick = () => { currentMonth--; checkDate(); };
+document.getElementById('nextMonth').onclick = () => { currentMonth++; checkDate(); };
+document.getElementById('prevYear').onclick = () => { currentYear--; checkDate(); };
+document.getElementById('nextYear').onclick = () => { currentYear++; checkDate(); };
+
+function checkDate() {
+    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+    renderCalendar();
+}
+
+window.onload = () => {
+    renderCalendar();
+    loadTasks();
+};
