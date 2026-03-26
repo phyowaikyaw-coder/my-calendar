@@ -4,7 +4,7 @@ let viewedDate = new Date();
 
 const months = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
 
-// အချိန်ဒေသ Error ကင်းအောင် ရက်စွဲထုတ်မည့် Function (YYYY-MM-DD)
+// Local Date Key (YYYY-MM-DD) ထုတ်ရန်
 function getDateKey(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -17,44 +17,67 @@ function renderCalendar() {
     const yearDisplay = document.getElementById('yearDisplay');
     const calendarGrid = document.getElementById('calendarGrid');
 
+    // Element တွေ ရှိမရှိ အရင်စစ်မယ် (Error ကာကွယ်ရန်)
+    if (!monthDisplay || !yearDisplay || !calendarGrid) return;
+
     monthDisplay.innerText = months[currentMonth];
     yearDisplay.innerText = currentYear;
 
-    const dayNames = `
-        <div class="day-name sun">SUN</div><div class="day-name">MON</div>
-        <div class="day-name">TUE</div><div class="day-name">WED</div>
-        <div class="day-name">THUR</div><div class="day-name">FRI</div>
-        <div class="day-name sat">SAT</div>
-    `;
-    calendarGrid.innerHTML = dayNames;
+    // Grid ကို အရင် ရှင်းထုတ်မယ်
+    calendarGrid.innerHTML = "";
+
+    // ရက်သတ္တပတ် ခေါင်းစဉ်များ ထည့်မယ်
+    const days = ["SUN", "MON", "TUE", "WED", "THUR", "FRI", "SAT"];
+    days.forEach(dayName => {
+        const dayHeader = document.createElement('div');
+        dayHeader.classList.add('day-name');
+        if (dayName === "SUN") dayHeader.classList.add('sun');
+        if (dayName === "SAT") dayHeader.classList.add('sat');
+        dayHeader.innerText = dayName;
+        calendarGrid.appendChild(dayHeader);
+    });
 
     const firstDay = new Date(currentYear, currentMonth, 1).getDay();
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const today = new Date();
+    const realTodayKey = getDateKey(today);
 
+    // အလွတ်ကွက်များ
     for (let i = 0; i < firstDay; i++) {
         const emptyDiv = document.createElement('div');
         emptyDiv.classList.add('day');
         calendarGrid.appendChild(emptyDiv);
     }
 
+    // ရက်စွဲများ
     for (let day = 1; day <= daysInMonth; day++) {
         const dayDiv = document.createElement('div');
         dayDiv.classList.add('day');
         dayDiv.innerText = day;
         dayDiv.style.cursor = "pointer";
 
-        if (day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
+        const thisDate = new Date(currentYear, currentMonth, day);
+        const thisDateKey = getDateKey(thisDate);
+
+        // ဒီနေ့ရက်ကို Highlight လုပ်မယ်
+        if (thisDateKey === realTodayKey) {
             dayDiv.classList.add('today-highlight');
         }
 
         dayDiv.onclick = () => {
             viewedDate = new Date(currentYear, currentMonth, day);
-            document.querySelectorAll('.day').forEach(d => d.style.background = "transparent");
-            dayDiv.style.background = "rgba(241, 196, 15, 0.3)";
+            
+            // Selection Style ပြောင်းခြင်း
+            document.querySelectorAll('.day').forEach(d => {
+                d.style.background = "transparent";
+                d.style.borderRadius = "0";
+            });
+            dayDiv.style.background = "rgba(241, 196, 15, 0.4)";
             dayDiv.style.borderRadius = "50%";
+            
             loadTasksByDate(viewedDate);
         };
+
         calendarGrid.appendChild(dayDiv);
     }
 }
@@ -75,7 +98,6 @@ function loadTasks() {
     const now = new Date();
     const todayKey = getDateKey(now);
     
-    // မနေ့ကရက်စွဲကို ရှာမယ်
     const yesterday = new Date(now);
     yesterday.setDate(now.getDate() - 1);
     const yesterdayKey = getDateKey(yesterday);
@@ -103,12 +125,11 @@ function loadTasksByDate(date) {
     const tomorrowLabel = document.getElementById('tomorrowLabel');
     const realTodayKey = getDateKey(new Date());
 
-    if (dateKey === realTodayKey) {
-        todayLabel.innerText = "TODAY TASKS";
-        tomorrowLabel.innerText = "TOMORROW TASKS";
-    } else {
-        todayLabel.innerText = `${date.getDate()} ${months[date.getMonth()]} TASKS`;
-        tomorrowLabel.innerText = `NEXT DAY TASKS`;
+    if (todayLabel) {
+        todayLabel.innerText = (dateKey === realTodayKey) ? "TODAY TASKS" : `${date.getDate()} ${months[date.getMonth()]} TASKS`;
+    }
+    if (tomorrowLabel) {
+        tomorrowLabel.innerText = (dateKey === realTodayKey) ? "TOMORROW TASKS" : "NEXT DAY TASKS";
     }
 
     const taskTypes = ['today', 'tomorrow', 'memory'];
@@ -117,9 +138,12 @@ function loadTasksByDate(date) {
     taskTypes.forEach(type => {
         nums.forEach(num => {
             const id = `${type}${num}`;
-            const currentKey = (type === 'tomorrow') ? tomorrowKey : dateKey;
-            const saved = localStorage.getItem(`${currentKey}_${id}`);
-            document.getElementById(id).value = saved ? saved : "";
+            const inputField = document.getElementById(id);
+            if (inputField) {
+                const currentKey = (type === 'tomorrow') ? tomorrowKey : dateKey;
+                const saved = localStorage.getItem(`${currentKey}_${id}`);
+                inputField.value = saved ? saved : "";
+            }
         });
     });
 }
