@@ -65,15 +65,14 @@ function renderCalendar() {
     }
 }
 
-// ၃။ Task သိမ်းဆည်းရန် (အဓိကပြင်ဆင်ချက်)
+// ၃။ Task သိမ်းဆည်းရန်
 function saveTask(id) {
     let targetDate = new Date(viewedDate);
     let storageId = id;
 
-    // အကယ်၍ Tomorrow မှာ ရိုက်ပြီး သိမ်းရင် နောက်ရက်ရဲ့ Today အနေနဲ့ သွားသိမ်းမယ်
     if (id.startsWith('tomorrow')) {
         targetDate.setDate(viewedDate.getDate() + 1);
-        storageId = id.replace('tomorrow', 'today'); // 'tomorrow1' ကို 'today1' အဖြစ်ပြောင်းသိမ်းမယ်
+        storageId = id.replace('tomorrow', 'today');
     }
 
     const dateKey = getDateKey(targetDate);
@@ -98,26 +97,23 @@ function loadTasksByDate(date) {
     tomDate.setDate(date.getDate() + 1);
     const tomKey = getDateKey(tomDate);
 
-    // Today Fields (၁၊ ၂၊ ၃)
     for (let i = 1; i <= 3; i++) {
         const val = localStorage.getItem(`${dateKey}_today${i}`);
         document.getElementById(`today${i}`).value = val ? val : "";
     }
 
-    // Tomorrow Fields (၁၊ ၂၊ ၃)
-    // ဒီနေရာမှာ Tomorrow Box ထဲကို နောက်ရက်ရဲ့ Today data ကို ဆွဲပြရမှာပါ
     for (let i = 1; i <= 3; i++) {
         const val = localStorage.getItem(`${tomKey}_today${i}`); 
         document.getElementById(`tomorrow${i}`).value = val ? val : "";
     }
 
-    // Memory Fields
     for (let i = 1; i <= 3; i++) {
         const val = localStorage.getItem(`${dateKey}_memory${i}`);
         document.getElementById(`memory${i}`).value = val ? val : "";
     }
 }
 
+// ခလုတ်များ Event Listeners
 document.getElementById('prevMonth').onclick = () => { currentMonth--; checkDate(); };
 document.getElementById('nextMonth').onclick = () => { currentMonth++; checkDate(); };
 document.getElementById('prevYear').onclick = () => { currentYear--; checkDate(); };
@@ -129,7 +125,32 @@ function checkDate() {
     renderCalendar();
 }
 
+// --- ၅။ Dark Mode / Light Mode Logic (အသစ်ပေါင်းထည့်ထားသော အပိုင်း) ---
+function initTheme() {
+    const themeBtn = document.getElementById('themeToggleBtn');
+    if (!themeBtn) return;
+
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    themeBtn.innerText = currentTheme === 'dark' ? "☀️ Light Mode" : "🌙 Dark Mode";
+
+    themeBtn.onclick = () => {
+        let theme = document.documentElement.getAttribute('data-theme');
+        if (theme === 'light') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+            themeBtn.innerText = "☀️ Light Mode";
+        } else {
+            document.documentElement.setAttribute('data-theme', 'light');
+            localStorage.setItem('theme', 'light');
+            themeBtn.innerText = "🌙 Dark Mode";
+        }
+    };
+}
+
+// window.onload တွင် အားလုံးကို run မည်
 window.onload = () => {
     renderCalendar();
     loadTasksByDate(new Date()); 
+    initTheme(); // Theme စနစ်ကို စတင်မည်
 };
