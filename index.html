@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Calendar App</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
 </head>
 <body>
 
@@ -24,23 +23,16 @@
         </div>
 
         <div class="calendar-grid" id="calendarGrid">
-            <div class="day-name sun">SUN</div>
-            <div class="day-name">MON</div>
-            <div class="day-name">TUE</div>
-            <div class="day-name">WED</div>
-            <div class="day-name">THUR</div>
-            <div class="day-name">FRI</div>
-            <div class="day-name sat">SAT</div>
-        </div>
+            </div>
 
-        <div class="task-label-title">TODAY TASKS</div>
+        <div class="task-label-title" id="todayLabel">TODAY TASKS</div>
         <div class="task-list">
             <div class="task-item"><span class="task-num">1</span><input type="text" id="today1" placeholder="Write Here..."><span class="check-mark" onclick="saveTask('today1')">OK</span></div>
             <div class="task-item"><span class="task-num">2</span><input type="text" id="today2" placeholder="Write Here..."><span class="check-mark" onclick="saveTask('today2')">OK</span></div>
             <div class="task-item"><span class="task-num">3</span><input type="text" id="today3" placeholder="Write Here..."><span class="check-mark" onclick="saveTask('today3')">OK</span></div>
         </div>
 
-        <div class="task-label-title">TOMORROW TASKS</div>
+        <div class="task-label-title" id="tomorrowLabel">TOMORROW TASKS</div>
         <div class="task-list">
             <div class="task-item"><span class="task-num">1</span><input type="text" id="tomorrow1" placeholder="Write Here..."><span class="check-mark" onclick="saveTask('tomorrow1')">OK</span></div>
             <div class="task-item"><span class="task-num">2</span><input type="text" id="tomorrow2" placeholder="Write Here..."><span class="check-mark" onclick="saveTask('tomorrow2')">OK</span></div>
