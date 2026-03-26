@@ -1,24 +1,23 @@
-// ၁။ အခြေခံ Variables များ
+// ၁။ အခြေခံ Variables
 let currentMonth = new Date().getMonth(); 
 let currentYear = new Date().getFullYear();
 let viewedDate = new Date(); 
 
 const months = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
 
-// ၂။ ရက်စွဲ Key ထုတ်ယူသည့် Function (YYYY-MM-DD)
+// ၂။ Local Date Key ထုတ်ယူခြင်း (YYYY-MM-DD)
 function getDateKey(date) {
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, '0');
     const d = String(date.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`; // ဒီနေရာမှာ d လို့ ပြင်လိုက်ပါပြီ
+    return `${y}-${m}-${d}`;
 }
 
-// ၃။ Calendar ဆွဲသည့် Function
+// ၃။ Calendar ဆွဲခြင်း
 function renderCalendar() {
     const monthDisplay = document.getElementById('monthDisplay');
     const yearDisplay = document.getElementById('yearDisplay');
     const calendarGrid = document.getElementById('calendarGrid');
-
     if (!calendarGrid) return; 
 
     monthDisplay.innerText = months[currentMonth];
@@ -33,8 +32,7 @@ function renderCalendar() {
 
     const firstDay = new Date(currentYear, currentMonth, 1).getDay();
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-    const today = new Date();
-    const todayKey = getDateKey(today);
+    const todayKey = getDateKey(new Date());
 
     for (let i = 0; i < firstDay; i++) {
         const div = document.createElement('div');
@@ -64,7 +62,6 @@ function renderCalendar() {
             dayDiv.style.borderRadius = "50%";
             loadTasksByDate(viewedDate);
         };
-
         calendarGrid.appendChild(dayDiv);
     }
 }
@@ -72,70 +69,57 @@ function renderCalendar() {
 // ၄။ Task သိမ်းဆည်းရန်
 function saveTask(id) {
     let targetDate = new Date(viewedDate);
+    // Tomorrow Task ဆိုရင် ကြည့်နေတဲ့ရက်ရဲ့ နောက်တစ်ရက်မှာ သွားသိမ်းမယ်
     if (id.startsWith('tomorrow')) {
         targetDate.setDate(viewedDate.getDate() + 1);
     }
 
     const dateKey = getDateKey(targetDate);
+    // Tomorrow input က data ကို သိမ်းရင်လည်း 'today' ဆိုတဲ့ ID နဲ့ပဲ သိမ်းရမှာပါ (ဒါမှ နောက်ရက်မှာ Today ဖြစ်မှာပါ)
+    const storageId = id.startsWith('tomorrow') ? id.replace('tomorrow', 'today') : id;
+    
     const value = document.getElementById(id).value;
-    localStorage.setItem(`${dateKey}_${id}`, value);
+    localStorage.setItem(`${dateKey}_${storageId}`, value);
     alert("Saved for " + dateKey);
 }
 
-// ၅။ Tomorrow -> Today ပြောင်းပေးသည့် Rolling System
-function loadTasks() {
-    const now = new Date();
-    const todayKey = getDateKey(now);
-    
-    const yesterday = new Date(now);
-    yesterday.setDate(now.getDate() - 1);
-    const yesterdayKey = getDateKey(yesterday);
-
-    const nums = ['1', '2', '3'];
-    nums.forEach(num => {
-        const pending = localStorage.getItem(`${yesterdayKey}_tomorrow${num}`);
-        if (pending) {
-            localStorage.setItem(`${todayKey}_today${num}`, pending);
-            localStorage.removeItem(`${yesterdayKey}_tomorrow${num}`);
-        }
-    });
-
-    viewedDate = now;
-    loadTasksByDate(now);
-}
-
-// ၆။ ရက်စွဲအလိုက် Task ပြန်ဖော်ရန်
+// ၅။ အချက်အလက်များကို ပြန်ဖော်ရန် (အဓိက အပိုင်း)
 function loadTasksByDate(date) {
     const dateKey = getDateKey(date);
-    const tomDate = new Date(date);
-    tomDate.setDate(date.getDate() + 1);
-    const tomKey = getDateKey(tomDate);
-
     const todayLabel = document.getElementById('todayLabel');
     const tomorrowLabel = document.getElementById('tomorrowLabel');
     const realTodayKey = getDateKey(new Date());
 
+    // Label ပြောင်းလဲခြင်း
     if (todayLabel) {
         todayLabel.innerText = (dateKey === realTodayKey) ? "TODAY TASKS" : `${date.getDate()} ${months[date.getMonth()]} TASKS`;
     }
-    if (tomorrowLabel) {
-        tomorrowLabel.innerText = (dateKey === realTodayKey) ? "TOMORROW TASKS" : "NEXT DAY TASKS";
+
+    // Tomorrow အတွက် ရက်စွဲတွက်ခြင်း
+    const tomDate = new Date(date);
+    tomDate.setDate(date.getDate() + 1);
+    const tomKey = getDateKey(tomDate);
+
+    // Today Fields (၁၊ ၂၊ ၃)
+    for (let i = 1; i <= 3; i++) {
+        const val = localStorage.getItem(`${dateKey}_today${i}`);
+        document.getElementById(`today${i}`).value = val ? val : "";
     }
 
-    ['today', 'tomorrow', 'memory'].forEach(type => {
-        ['1', '2', '3'].forEach(num => {
-            const id = `${type}${num}`;
-            const key = (type === 'tomorrow') ? tomKey : dateKey;
-            const val = localStorage.getItem(`${key}_${id}`);
-            const input = document.getElementById(id);
-            if (input) {
-                input.value = val ? val : "";
-            }
-        });
-    });
+    // Tomorrow Fields (၁၊ ၂၊ ၃)
+    for (let i = 1; i <= 3; i++) {
+        const val = localStorage.getItem(`${tomKey}_today${i}`); // Tomorrow ဆိုတာ နောက်ရက်ရဲ့ Today ပါပဲ
+        document.getElementById(`tomorrow${i}`).value = val ? val : "";
+    }
+
+    // Memory Fields
+    for (let i = 1; i <= 3; i++) {
+        const val = localStorage.getItem(`${dateKey}_memory${i}`);
+        document.getElementById(`memory${i}`).value = val ? val : "";
+    }
 }
 
-// ၇။ ခလုတ်များ
+// ခလုတ်များ
 document.getElementById('prevMonth').onclick = () => { currentMonth--; checkDate(); };
 document.getElementById('nextMonth').onclick = () => { currentMonth++; checkDate(); };
 document.getElementById('prevYear').onclick = () => { currentYear--; checkDate(); };
@@ -147,8 +131,7 @@ function checkDate() {
     renderCalendar();
 }
 
-// ၈။ စတင်ခြင်း
 window.onload = () => {
     renderCalendar();
-    loadTasks();
+    loadTasksByDate(new Date()); // Page စဖွင့်ရင် ဒီနေ့အတွက် Load လုပ်မယ်
 };
