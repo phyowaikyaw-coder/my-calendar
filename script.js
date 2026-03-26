@@ -10,7 +10,7 @@ function getDateKey(date) {
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, '0');
     const d = String(date.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}`;
+    return `${y}-${m}-${d}`; // ဒီနေရာမှာ d လို့ ပြင်လိုက်ပါပြီ
 }
 
 // ၃။ Calendar ဆွဲသည့် Function
@@ -19,12 +19,11 @@ function renderCalendar() {
     const yearDisplay = document.getElementById('yearDisplay');
     const calendarGrid = document.getElementById('calendarGrid');
 
-    if (!calendarGrid) return; // Grid မရှိရင် ရပ်မယ်
+    if (!calendarGrid) return; 
 
     monthDisplay.innerText = months[currentMonth];
     yearDisplay.innerText = currentYear;
 
-    // အဟောင်းတွေကို ရှင်းမယ်
     calendarGrid.innerHTML = `
         <div class="day-name sun">SUN</div><div class="day-name">MON</div>
         <div class="day-name">TUE</div><div class="day-name">WED</div>
@@ -35,22 +34,21 @@ function renderCalendar() {
     const firstDay = new Date(currentYear, currentMonth, 1).getDay();
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const today = new Date();
-    const todayKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+    const todayKey = getDateKey(today);
 
-    // အလွတ်ကွက်များ
     for (let i = 0; i < firstDay; i++) {
         const div = document.createElement('div');
         div.className = "day";
         calendarGrid.appendChild(div);
     }
 
-    // ရက်စွဲများ
     for (let day = 1; day <= daysInMonth; day++) {
         const dayDiv = document.createElement('div');
         dayDiv.className = "day";
         dayDiv.innerText = day;
 
-        const checkKey = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const checkDate = new Date(currentYear, currentMonth, day);
+        const checkKey = getDateKey(checkDate);
         
         if (checkKey === todayKey) {
             dayDiv.classList.add('today-highlight');
@@ -58,8 +56,10 @@ function renderCalendar() {
 
         dayDiv.onclick = () => {
             viewedDate = new Date(currentYear, currentMonth, day);
-            // Highlight ပြောင်းမယ်
-            document.querySelectorAll('.day').forEach(d => d.style.background = "transparent");
+            document.querySelectorAll('.day').forEach(d => {
+                d.style.background = "transparent";
+                d.style.borderRadius = "0";
+            });
             dayDiv.style.background = "rgba(241, 196, 15, 0.3)";
             dayDiv.style.borderRadius = "50%";
             loadTasksByDate(viewedDate);
@@ -76,11 +76,7 @@ function saveTask(id) {
         targetDate.setDate(viewedDate.getDate() + 1);
     }
 
-    const year = targetDate.getFullYear();
-    const month = String(targetDate.getMonth() + 1).padStart(2, '0');
-    const day = String(targetDate.getDate()).padStart(2, '0');
-    const dateKey = `${year}-${month}-${day}`;
-
+    const dateKey = getDateKey(targetDate);
     const value = document.getElementById(id).value;
     localStorage.setItem(`${dateKey}_${id}`, value);
     alert("Saved for " + dateKey);
@@ -89,11 +85,11 @@ function saveTask(id) {
 // ၅။ Tomorrow -> Today ပြောင်းပေးသည့် Rolling System
 function loadTasks() {
     const now = new Date();
-    const todayKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    const todayKey = getDateKey(now);
     
     const yesterday = new Date(now);
     yesterday.setDate(now.getDate() - 1);
-    const yesterdayKey = `${yesterday.getFullYear()}-${String(yesterday.getMonth()+1).padStart(2,'0')}-${String(yesterday.getDate()).padStart(2,'0')}`;
+    const yesterdayKey = getDateKey(yesterday);
 
     const nums = ['1', '2', '3'];
     nums.forEach(num => {
@@ -110,20 +106,20 @@ function loadTasks() {
 
 // ၆။ ရက်စွဲအလိုက် Task ပြန်ဖော်ရန်
 function loadTasksByDate(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const dateKey = `${year}-${month}-${day}`;
-
+    const dateKey = getDateKey(date);
     const tomDate = new Date(date);
     tomDate.setDate(date.getDate() + 1);
-    const tomKey = `${tomDate.getFullYear()}-${String(tomDate.getMonth()+1).padStart(2,'0')}-${String(tomDate.getDate()).padStart(2,'0')}`;
+    const tomKey = getDateKey(tomDate);
 
     const todayLabel = document.getElementById('todayLabel');
+    const tomorrowLabel = document.getElementById('tomorrowLabel');
+    const realTodayKey = getDateKey(new Date());
+
     if (todayLabel) {
-        const realToday = new Date();
-        const realTodayKey = `${realToday.getFullYear()}-${String(realToday.getMonth()+1).padStart(2,'0')}-${String(realToday.getDate()).padStart(2,'0')}`;
-        todayLabel.innerText = (dateKey === realTodayKey) ? "TODAY TASKS" : `${day} ${months[date.getMonth()]} TASKS`;
+        todayLabel.innerText = (dateKey === realTodayKey) ? "TODAY TASKS" : `${date.getDate()} ${months[date.getMonth()]} TASKS`;
+    }
+    if (tomorrowLabel) {
+        tomorrowLabel.innerText = (dateKey === realTodayKey) ? "TOMORROW TASKS" : "NEXT DAY TASKS";
     }
 
     ['today', 'tomorrow', 'memory'].forEach(type => {
@@ -131,8 +127,9 @@ function loadTasksByDate(date) {
             const id = `${type}${num}`;
             const key = (type === 'tomorrow') ? tomKey : dateKey;
             const val = localStorage.getItem(`${key}_${id}`);
-            if (document.getElementById(id)) {
-                document.getElementById(id).value = val ? val : "";
+            const input = document.getElementById(id);
+            if (input) {
+                input.value = val ? val : "";
             }
         });
     });
