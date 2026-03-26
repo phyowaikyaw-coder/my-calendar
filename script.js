@@ -65,30 +65,37 @@ function renderCalendar() {
     }
 }
 
-// ၃။ Task သိမ်းဆည်းရန်
+// ၃။ Task သိမ်းဆည်းရန် (Memory အတွက် Fixed Key သုံးထားသည်)
 function saveTask(id) {
     let targetDate = new Date(viewedDate);
-    let storageId = id;
+    let finalKey = "";
 
-    if (id.startsWith('tomorrow')) {
-        targetDate.setDate(viewedDate.getDate() + 1);
-        storageId = id.replace('tomorrow', 'today');
+    if (id.startsWith('memory')) {
+        // Memory ဆိုရင် ရက်စွဲနဲ့ မချိတ်ဘဲ ပုံသေ Key တစ်ခုတည်းနဲ့ သိမ်းမည်
+        finalKey = `fixed_${id}`;
+    } else {
+        // Today နဲ့ Tomorrow အတွက်ကတော့ အရင်အတိုင်း ရက်စွဲနဲ့ ခွဲသိမ်းမည်
+        let storageId = id;
+        if (id.startsWith('tomorrow')) {
+            targetDate.setDate(viewedDate.getDate() + 1);
+            storageId = id.replace('tomorrow', 'today');
+        }
+        const dateKey = getDateKey(targetDate);
+        finalKey = `${dateKey}_${storageId}`;
     }
 
-    const dateKey = getDateKey(targetDate);
     const value = document.getElementById(id).value;
-    
-    localStorage.setItem(`${dateKey}_${storageId}`, value);
-    alert("Saved success for " + dateKey);
+    localStorage.setItem(finalKey, value);
+    alert("Saved success!");
 }
 
 // ၄။ အချက်အလက်များကို ပြန်ဖော်ရန်
 function loadTasksByDate(date) {
     const dateKey = getDateKey(date);
     const todayLabel = document.getElementById('todayLabel');
-    const tomorrowLabel = document.getElementById('tomorrowLabel');
     const realTodayKey = getDateKey(new Date());
 
+    // Label Update
     if (todayLabel) {
         todayLabel.innerText = (dateKey === realTodayKey) ? "TODAY TASKS" : `${date.getDate()} ${months[date.getMonth()]} TASKS`;
     }
@@ -97,23 +104,25 @@ function loadTasksByDate(date) {
     tomDate.setDate(date.getDate() + 1);
     const tomKey = getDateKey(tomDate);
 
+    // Today & Tomorrow Tasks ပြန်ဖော်ခြင်း
     for (let i = 1; i <= 3; i++) {
-        const val = localStorage.getItem(`${dateKey}_today${i}`);
-        document.getElementById(`today${i}`).value = val ? val : "";
+        const todayVal = localStorage.getItem(`${dateKey}_today${i}`);
+        const tomorrowVal = localStorage.getItem(`${tomKey}_today${i}`);
+        
+        if (document.getElementById(`today${i}`)) document.getElementById(`today${i}`).value = todayVal || "";
+        if (document.getElementById(`tomorrow${i}`)) document.getElementById(`tomorrow${i}`).value = tomorrowVal || "";
     }
 
+    // Memory ပြန်ဖော်ခြင်း (ဘယ်နေ့သွားသွား ပုံသေပေါ်နေမည်)
     for (let i = 1; i <= 3; i++) {
-        const val = localStorage.getItem(`${tomKey}_today${i}`); 
-        document.getElementById(`tomorrow${i}`).value = val ? val : "";
-    }
-
-    for (let i = 1; i <= 3; i++) {
-        const val = localStorage.getItem(`${dateKey}_memory${i}`);
-        document.getElementById(`memory${i}`).value = val ? val : "";
+        const memoryVal = localStorage.getItem(`fixed_memory${i}`);
+        if (document.getElementById(`memory${i}`)) {
+            document.getElementById(`memory${i}`).value = memoryVal || "";
+        }
     }
 }
 
-// ခလုတ်များ Event Listeners
+// ခလုတ်များ
 document.getElementById('prevMonth').onclick = () => { currentMonth--; checkDate(); };
 document.getElementById('nextMonth').onclick = () => { currentMonth++; checkDate(); };
 document.getElementById('prevYear').onclick = () => { currentYear--; checkDate(); };
@@ -125,7 +134,7 @@ function checkDate() {
     renderCalendar();
 }
 
-// --- ၅။ Dark Mode / Light Mode Logic (အသစ်ပေါင်းထည့်ထားသော အပိုင်း) ---
+// ၅။ Dark Mode / Light Mode Logic
 function initTheme() {
     const themeBtn = document.getElementById('themeToggleBtn');
     if (!themeBtn) return;
@@ -148,9 +157,8 @@ function initTheme() {
     };
 }
 
-// window.onload တွင် အားလုံးကို run မည်
 window.onload = () => {
     renderCalendar();
     loadTasksByDate(new Date()); 
-    initTheme(); // Theme စနစ်ကို စတင်မည်
+    initTheme(); 
 };
